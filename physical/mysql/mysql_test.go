@@ -64,6 +64,7 @@ func TestMySQLPlaintextCatch(t *testing.T) {
 
 func TestMySQLBackend(t *testing.T) {
 	cleanup, connURL := mysqlhelper.PrepareTestContainer(t, false, "secret")
+	// TODO It's never going to get the connection URL this way
 	fmt.Printf("Connurl is %s\n", connURL)
 	defer cleanup()
 	address := os.Getenv("MYSQL_ADDR")
