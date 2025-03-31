@@ -160,6 +160,58 @@ func TestMySQLHABackend(t *testing.T) {
 	physical.ExerciseHABackend(t, b.(physical.HABackend), b2.(physical.HABackend))
 }
 
+func TestMySQLCredentialEnvVars(t *testing.T) {
+	address := os.Getenv("MYSQL_ADDR")
+	if address == "" {
+		t.SkipNow()
+	}
+
+	database := os.Getenv("MYSQL_DB")
+	if database == "" {
+		database = "test"
+	}
+
+	table := os.Getenv("MYSQL_TABLE")
+	if table == "" {
+		table = "test"
+	}
+
+	username := os.Getenv("MYSQL_USERNAME")
+	password := os.Getenv("MYSQL_PASSWORD")
+	// Set the environment variables which the backend will read TODO: catch errors
+	_ = os.Setenv("VAULT_MYSQL_USERNAME", username)
+	_ = os.Setenv("VAULT_MYSQL_PASSWORD", password)
+
+	defer func() {
+		os.Unsetenv("VAULT_MYSQL_USERNAME")
+		os.Unsetenv("VAULT_MYSQL_PASSWORD")
+	}()
+
+	// Run vault tests
+	logger := logging.NewVaultLogger(log.Debug)
+	config := map[string]string{
+		"address":                      address,
+		"database":                     database,
+		"table":                        table,
+		"ha_enabled":                   "true",
+		"plaintext_connection_allowed": "true",
+	}
+
+	b, err := NewMySQLBackend(config, logger)
+	if err != nil {
+		t.Fatalf("Failed to create new backend: %v", err)
+	}
+	defer func() {
+		mysqlB := b.(*MySQLBackend)
+		_, err := mysqlB.client.Exec("DROP TABLE IF EXISTS " + mysqlB.dbTable + " ," + mysqlB.dbLockTable)
+		if err != nil {
+			t.Fatalf("Failed to drop table: %v", err)
+		}
+	}()
+
+	physical.ExerciseBackend(t, b)
+}
+
 // TestMySQLHABackend_LockFailPanic is a regression test for the panic shown in
 // https://github.com/hashicorp/vault/issues/8203 and patched in
 // https://github.com/hashicorp/vault/pull/8229
