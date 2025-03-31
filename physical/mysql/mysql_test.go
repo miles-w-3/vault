@@ -5,13 +5,14 @@ package mysql
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	mysql "github.com/go-sql-driver/mysql"
 	log "github.com/hashicorp/go-hclog"
 	mysqlhelper "github.com/hashicorp/vault/helper/testhelpers/mysql"
 	"github.com/hashicorp/vault/sdk/helper/logging"
@@ -62,6 +63,9 @@ func TestMySQLPlaintextCatch(t *testing.T) {
 }
 
 func TestMySQLBackend(t *testing.T) {
+	cleanup, connURL := mysqlhelper.PrepareTestContainer(t, false, "secret")
+	fmt.Printf("Connurl is %s\n", connURL)
+	defer cleanup()
 	address := os.Getenv("MYSQL_ADDR")
 	if address == "" {
 		t.SkipNow()

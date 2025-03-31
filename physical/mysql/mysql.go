@@ -114,14 +114,14 @@ func NewMySQLBackend(conf map[string]string, logger log.Logger) (physical.Backen
 	defer tableRows.Close()
 	tableExist = tableRows.Next()
 
-	// Create the required database if it doesn't exists.
+	// Create the required database if it doesn't exist.
 	if !schemaExist {
 		if _, err := db.Exec("CREATE DATABASE IF NOT EXISTS `" + database + "`"); err != nil {
 			return nil, fmt.Errorf("failed to create mysql database: %w", err)
 		}
 	}
 
-	// Create the required table if it doesn't exists.
+	// Create the required table if it doesn't exist.
 	if !tableExist {
 		create_query := "CREATE TABLE IF NOT EXISTS " + dbTable +
 			" (vault_key varbinary(3072), vault_value mediumblob, PRIMARY KEY (vault_key))"
