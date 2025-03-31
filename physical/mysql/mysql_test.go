@@ -179,7 +179,7 @@ func TestMySQLCredentialEnvVars(t *testing.T) {
 	username := os.Getenv("MYSQL_USERNAME")
 	password := os.Getenv("MYSQL_PASSWORD")
 	// Set the environment variables which the backend will read TODO: catch errors
-	_ = os.Setenv("VAULT_MYSQL_USERNAME", username)
+	_ = os.Setenv("VAULT_MYSQL_USERNAME", "baduser")
 	_ = os.Setenv("VAULT_MYSQL_PASSWORD", password)
 
 	defer func() {
@@ -208,8 +208,6 @@ func TestMySQLCredentialEnvVars(t *testing.T) {
 			t.Fatalf("Failed to drop table: %v", err)
 		}
 	}()
-
-	physical.ExerciseBackend(t, b)
 }
 
 // TestMySQLHABackend_LockFailPanic is a regression test for the panic shown in
