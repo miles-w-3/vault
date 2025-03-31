@@ -176,7 +176,7 @@ func TestMySQLCredentialEnvVars(t *testing.T) {
 		table = "test"
 	}
 
-	username := os.Getenv("MYSQL_USERNAME")
+	_ = os.Getenv("MYSQL_USERNAME")
 	password := os.Getenv("MYSQL_PASSWORD")
 	// Set the environment variables which the backend will read TODO: catch errors
 	_ = os.Setenv("VAULT_MYSQL_USERNAME", "baduser")
