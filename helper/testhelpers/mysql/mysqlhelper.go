@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/vault/sdk/helper/docker"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type Config struct {
@@ -29,21 +30,28 @@ func PrepareTestContainer(t *testing.T, legacy bool, pw string) (func(), string)
 
 	// ARM64 is only supported on MySQL 8.0 and above. If we update
 	// our image and support to 8.0, we can unskip these tests.
-	if strings.Contains(runtime.GOARCH, "arm") {
-		t.Skip("Skipping, as MySQL 5.7 is not supported on ARM architectures")
-	}
+	// if strings.Contains(runtime.GOARCH, "arm") {
+	// 	t.Skip("Skipping, as MySQL 5.7 is not supported on ARM architectures")
+	// }
 
+	platform := &ocispec.Platform{
+		Architecture: "amd64",
+		OS:           "linux",
+	}
 	imageVersion := "5.7"
 	if legacy {
-		imageVersion = "5.6"
+		// temporary to test without changing other sigs - this obv isn't legacy
+		imageVersion = "8.0"
+		platform.Architecture = runtime.GOARCH
 	}
 
 	runner, err := docker.NewServiceRunner(docker.RunOptions{
 		ContainerName: "mysql",
-		ImageRepo:     "docker.mirror.hashicorp.services/library/mysql",
+		ImageRepo:     "mysql",
 		ImageTag:      imageVersion,
 		Ports:         []string{"3306/tcp"},
 		Env:           []string{"MYSQL_ROOT_PASSWORD=" + pw},
+		Platform:      nil,
 	})
 	if err != nil {
 		t.Fatalf("could not start docker mysql: %s", err)

@@ -32,9 +32,10 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"github.com/hashicorp/go-uuid"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-const DockerAPIVersion = "1.40"
+const DockerAPIVersion = "1.41"
 
 type Runner struct {
 	DockerAPI  *client.Client
@@ -63,6 +64,7 @@ type RunOptions struct {
 	LogStderr              io.Writer
 	LogStdout              io.Writer
 	VolumeNameToMountPoint map[string]string
+	Platform               *ocispec.Platform
 }
 
 func NewDockerAPI() (*client.Client, error) {
@@ -427,7 +429,7 @@ func (d *Runner) Start(ctx context.Context, addSuffix, forceLocalAddr bool) (*St
 		})
 	}
 
-	c, err := d.DockerAPI.ContainerCreate(ctx, cfg, hostConfig, netConfig, nil, cfg.Hostname)
+	c, err := d.DockerAPI.ContainerCreate(ctx, cfg, hostConfig, netConfig, d.RunOptions.Platform, cfg.Hostname)
 	if err != nil {
 		return nil, fmt.Errorf("container create failed: %v", err)
 	}

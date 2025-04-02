@@ -6,11 +6,12 @@ package mysql
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/hashicorp/go-hclog"
@@ -63,7 +64,7 @@ func TestMySQLPlaintextCatch(t *testing.T) {
 }
 
 func TestMySQLBackend(t *testing.T) {
-	cleanup, connURL := mysqlhelper.PrepareTestContainer(t, false, "secret")
+	cleanup, connURL := mysqlhelper.PrepareTestContainer(t, true, "secret")
 	// TODO It's never going to get the connection URL this way
 	fmt.Printf("Connurl is %s\n", connURL)
 	defer cleanup()
